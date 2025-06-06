@@ -24,7 +24,8 @@ async def upload_pdf(file: UploadFile = File(...)):
         splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         docs = splitter.split_documents(documents)
 
-        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-MiniLM-L3-v2")
+
         faiss_index = FAISS.from_documents(docs, embeddings)
 
         llm = ChatGroq(
