@@ -25,6 +25,7 @@ jobs:
           install_components: 'beta'
 
 
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy fastapi-app \
