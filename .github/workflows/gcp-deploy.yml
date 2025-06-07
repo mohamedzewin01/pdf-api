@@ -21,7 +21,7 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: ${{ secrets.GCP_SA_KEY }}
           install_components: 'beta'
 
       - name: Deploy to Cloud Run
