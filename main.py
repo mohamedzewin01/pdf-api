@@ -1,26 +1,20 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
-from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from langchain.vectorstores import FAISS
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.chains import RetrievalQA
-from langchain.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from fastapi.responses import JSONResponse
 from langchain_groq import ChatGroq
 import os
 import tempfile
 import logging
-from pathlib import Path
-
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain.chains import RetrievalQA
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
-app = FastAPI(title="RAG PDF Question Answering System", version="1.0.0")
-
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app = FastAPI(title="RAG PDF Question Answering API", version="1.0.0")
 
 # Global variables to store the QA chain and document info
 qa_chain = None
@@ -37,14 +31,20 @@ except Exception as e:
     logger.error(f"Failed to load embeddings model: {e}")
     embeddings = None
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def read_root():
-    """Serve the main HTML page"""
-    try:
-        with open("static/index.html", "r") as f:
-            return HTMLResponse(content=f.read())
-    except FileNotFoundError:
-        return HTMLResponse(content="<h1>Error: Frontend files not found</h1>", status_code=500)
+    """Root endpoint with API information"""
+    return {
+        "message": "PDF AI Question Answering API",
+        "version": "1.0.0",
+        "endpoints": {
+            "upload": "/upload_pdf/ - POST - Upload a PDF file",
+            "ask": "/ask/ - POST - Ask a question about uploaded PDF",
+            "health": "/health - GET - Health check",
+            "status": "/status/ - GET - System status",
+            "reset": "/reset/ - DELETE - Reset system"
+        }
+    }
 
 @app.get("/health")
 async def health_check():
@@ -225,10 +225,13 @@ if __name__ == "__main__":
     if not os.getenv("GROQ_API_KEY"):
         logger.warning("GROQ_API_KEY environment variable not set. PDF processing will fail.")
     
+    # Get port from environment or default to 8000
+    port = int(os.getenv("PORT", 8000))
+    
     # Start the server
     uvicorn.run(
         app, 
         host="0.0.0.0", 
-        port=8000,
+        port=port,
         log_level="info"
     )
